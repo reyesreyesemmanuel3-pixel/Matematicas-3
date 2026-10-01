@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Práctica de Matemáticas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#eef3f8;--card:#fff;--ink:#14213d;--mute:#5b6b85;--line:#cfd9e6;--acc:#2f5bea;--ok:#1f8a5b;--okbg:#e2f4ea;--bad:#c8423a;--badbg:#fbe6e4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1523;--card:#172136;--ink:#e8eefb;--mute:#93a3bf;--line:#2a3857;--acc:#6f93ff;--ok:#4cc38a;--okbg:#14332a;--bad:#ff7b72;--badbg:#3a1d21}}
+:root[data-theme="dark"]{--bg:#0e1523;--card:#172136;--ink:#e8eefb;--mute:#93a3bf;--line:#2a3857;--acc:#6f93ff;--ok:#4cc38a;--okbg:#14332a;--bad:#ff7b72;--badbg:#3a1d21}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.5 "Space Grotesk",system-ui,sans-serif}
+main{max-width:680px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.5rem;margin:8px 0 4px}
+.sub{color:var(--mute);margin:0 0 20px}
+.vec{height:14px;position:relative;margin:0 14px 6px 0}
+.vec i{display:block;height:6px;margin-top:4px;background:var(--acc);border-radius:3px 0 0 3px;transition:width .4s;width:0}
+.vec b{position:absolute;top:0;width:14px;height:14px;background:var(--acc);clip-path:polygon(0 0,100% 50%,0 100%);transition:left .4s;left:0}
+.meta{display:flex;justify-content:space-between;color:var(--mute);font-size:.9rem;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.q{font-size:1.2rem;font-weight:700;margin:0 0 16px;line-height:1.35}
+.hint{color:var(--mute);font-size:.88rem;margin:0 0 14px}
+.fld{margin-bottom:12px}
+label{display:block;font-size:.95rem;color:var(--mute);margin-bottom:4px}
+input{width:100%;font:inherit;color:var(--ink);background:transparent;border:1.5px solid var(--line);border-radius:8px;padding:11px 12px}
+input:focus-visible,.btn:focus-visible,summary:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+input.ok{border-color:var(--ok);background:var(--okbg)}
+input.bad{border-color:var(--bad);background:var(--badbg)}
+.cor{color:var(--ok);font-size:.95rem;margin-top:4px;font-weight:500}
+.fb{margin:12px 0 6px;font-weight:700}
+.st{margin:8px 0 14px;padding-left:22px}
+.st li{margin-bottom:4px}
+summary{cursor:pointer;color:var(--acc);font-weight:500;margin:6px 0}
+.btn{font:inherit;font-weight:700;background:var(--acc);color:#fff;border:0;border-radius:8px;padding:12px 22px;cursor:pointer;margin-top:6px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0e1523}}
+:root[data-theme="dark"] .btn{color:#0e1523}
+.score{font-size:3.2rem;font-weight:700;margin:0}
+.rev{margin-top:20px;border-top:1px solid var(--line);padding-top:12px}
+.rev p{margin:10px 0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>Práctica de Matemáticas</h1>
+<p class="sub">Escribe tu respuesta. Si te equivocas, te la corrijo y te explico el procedimiento paso a paso.</p>
+<div id="quiz">
+<div class="vec"><i id="bar"></i><b id="tip"></b></div>
+<div class="meta"><span id="n"></span><span id="pts"></span></div>
+<div class="card">
+<p class="q" id="q"></p>
+<p class="hint">Fracciones como 28/3. Raíces como √5 o raiz(5). También puedes usar decimales (2.24). Para sí o no, escribe "si" o "no".</p>
+<div id="flds"></div>
+<button class="btn" id="chk">Comprobar</button>
+<div id="res" hidden>
+<p class="fb" id="fb" aria-live="polite"></p>
+<div id="sol"></div>
+<button class="btn" id="next">Siguiente pregunta</button>
+</div>
+</div>
+</div>
+<div id="end" class="card" hidden>
+<p class="score" id="sc"></p>
+<p id="msg"></p>
+<button class="btn" id="again">Intentar de nuevo</button>
+<div class="rev" id="rev"></div>
+</div>
+</main>
+<script>
+function N(l,v,d){return{l:l,t:"n",v:v,d:d}}
+function S(l,a,d){return{l:l,t:"s",a:a,d:d}}
+var Q=[
+["Una embarcación está en (2, 5) y sufre una avería. Hay una lancha en A(0, 4) y otra en B(3, −4). Calcula la distancia a cada una y di cuál está más cerca.",
+[N("Distancia a A",Math.sqrt(5),"√5 ≈ 2.24"),N("Distancia a B",Math.sqrt(82),"√82 ≈ 9.06"),S("¿Cuál está más cerca? (A o B)",["a","lanchaa","laa","0,4"],"La lancha A")],
+["Fórmula de distancia: d = √[(x₂ − x₁)² + (y₂ − y₁)²].","De (2, 5) a A(0, 4): √[(0−2)² + (4−5)²] = √(4 + 1) = √5 ≈ 2.24.","De (2, 5) a B(3, −4): √[(3−2)² + (−4−5)²] = √(1 + 81) = √82 ≈ 9.06.","Como 2.24 < 9.06, la lancha A es la más cercana."]],
+["Una embarcación está en (1, 1). Hay una lancha en P(4, 5) y otra en Q(−2, 1). Calcula la distancia a cada una y di cuál está más cerca.",
+[N("Distancia a P",5,"5"),N("Distancia a Q",3,"3"),S("¿Cuál está más cerca? (P o Q)",["q","lanchaq","-2,1"],"La lancha Q")],
+["P: √[(4−1)² + (5−1)²] = √(9 + 16) = √25 = 5.","Q: √[(−2−1)² + (1−1)²] = √(9 + 0) = 3.","Como 3 < 5, la lancha Q está más cerca."]],
+["Transforma (3/4)x − 1 = 7 a su forma estándar ax + b = 0 con coeficientes enteros.",
+[S("Tu ecuación",["3x-32=0","-32+3x=0","3/4x-8=0","0.75x-8=0","0=3x-32"],"3x − 32 = 0")],
+["Pasa el 7 restando al lado izquierdo: (3/4)x − 1 − 7 = 0.","Suma los números: (3/4)x − 8 = 0.","Multiplica toda la ecuación por 4 para quitar la fracción: 3x − 32 = 0."]],
+["Transforma (2/5)x + 3 = 7 a su forma estándar ax + b = 0 con coeficientes enteros.",
+[S("Tu ecuación",["2x-20=0","-20+2x=0","2/5x-4=0","0.4x-4=0","0=2x-20"],"2x − 20 = 0")],
+["Pasa el 7 restando: (2/5)x + 3 − 7 = 0.","Reduce: (2/5)x − 4 = 0.","Multiplica por 5: 2x − 20 = 0."]],
+["Resuelve: 5(x − 2) = 3x + 4",
+[N("x =",7,"x = 7")],
+["Distribuye el 5: 5x − 10 = 3x + 4.","Pasa 3x a la izquierda y −10 a la derecha: 5x − 3x = 4 + 10.","Reduce: 2x = 14.","Divide entre 2: x = 7.","Comprobación: 5(7 − 2) = 25 y 3(7) + 4 = 25 ✓"]],
+["Resuelve: 3(x + 2) = x + 12",
+[N("x =",3,"x = 3")],
+["Distribuye: 3x + 6 = x + 12.","Pasa x a la izquierda y 6 a la derecha: 3x − x = 12 − 6.","Reduce: 2x = 6.","Divide entre 2: x = 3.","Comprobación: 3(3 + 2) = 15 y 3 + 12 = 15 ✓"]],
+["¿El punto (0, −1) es solución de 2x − y = 1? Compruébalo sustituyendo.",
+[N("Valor de 2x − y con x = 0 y y = −1",1,"1"),S("¿Es solución? (si o no)",["si","yes"],"Sí")],
+["Sustituye x = 0 y y = −1 en 2x − y.","2(0) − (−1) = 0 + 1 = 1.","El resultado (1) coincide con el lado derecho de la ecuación (1).","Por lo tanto, sí es solución."]],
+["¿El punto (2, −1) es solución de x + 2y = 1? Compruébalo sustituyendo.",
+[N("Valor de x + 2y con x = 2 y y = −1",0,"0"),S("¿Es solución? (si o no)",["no"],"No")],
+["Sustituye x = 2 y y = −1 en x + 2y.","2 + 2(−1) = 2 − 2 = 0.","0 no es igual a 1, así que no coincide con el lado derecho.","Por lo tanto, no es solución."]],
+["Resuelve: 3x/4 = 7",
+[N("x =",28/3,"x = 28/3 ≈ 9.33")],
+["Multiplica ambos lados por 4: 3x = 28.","Divide entre 3: x = 28/3.","En decimal: x ≈ 9.33.","Comprobación: 3(28/3)/4 = 28/4 = 7 ✓"]],
+["Resuelve: 2x/5 = 6",
+[N("x =",15,"x = 15")],
+["Multiplica ambos lados por 5: 2x = 30.","Divide entre 2: x = 15.","Comprobación: 2(15)/5 = 30/5 = 6 ✓"]],
+["Comprueba analíticamente si A(0, 2), B(0, 0), C(2, 2) y D(2, 0) son los vértices de un cuadrado.",
+[N("Longitud de cada lado",2,"2"),N("Longitud de cada diagonal",Math.sqrt(8),"2√2 ≈ 2.83"),S("¿Forman un cuadrado? (si o no)",["si","yes"],"Sí")],
+["Orden de los vértices: A(0, 2) → B(0, 0) → D(2, 0) → C(2, 2) → A.","Lados: AB = √(0 + 4) = 2, BD = √(4 + 0) = 2, DC = √(0 + 4) = 2, CA = √(4 + 0) = 2.","Diagonales: AD = √(4 + 4) = 2√2 y BC = √(4 + 4) = 2√2.","Los 4 lados son iguales y las 2 diagonales son iguales, así que sí es un cuadrado."]],
+["¿Los puntos A(0, 0), B(4, 0), C(4, 3) y D(0, 3) forman un cuadrado?",
+[N("Longitud del lado AB",4,"4"),N("Longitud del lado BC",3,"3"),S("¿Es un cuadrado? (si o no)",["no"],"No, es un rectángulo")],
+["AB = √[(4−0)² + 0²] = 4.","BC = √[0² + (3−0)²] = 3.","Los lados no son iguales (4 ≠ 3), así que no es un cuadrado. Es un rectángulo."]],
+["Un artesano vende lámparas en $45. El material para elaborarlas le cuesta $15 cada una y además tiene un pago fijo de $180 por el taller. Establece la ecuación para saber cuántas lámparas (x) debe vender para cubrir sus gastos.",
+[S("Tu ecuación (usa x)",["45x=15x+180","45x=180+15x","15x+180=45x","180+15x=45x","45x-15x=180","30x=180","45x-180=15x","45x-15x-180=0"],"45x = 15x + 180")],
+["x = número de lámparas vendidas.","Ingresos: 45x (cada lámpara se vende en $45).","Gastos: 15x del material más $180 fijos, es decir, 15x + 180.","Para cubrir los gastos, ingresos = gastos: 45x = 15x + 180."]],
+["Con la ecuación 45x = 15x + 180, ¿cuántas lámparas debe vender el artesano?",
+[N("x =",6,"x = 6 lámparas")],
+["Pasa 15x a la izquierda: 45x − 15x = 180.","Reduce: 30x = 180.","Divide entre 30: x = 6 lámparas.","Comprobación: ingresos 45(6) = 270 y gastos 15(6) + 180 = 270 ✓"]]
+];
+var i,s,wrong,done;
+function $(x){return document.getElementById(x)}
+function norm(t){return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[−–—]/g,"-").replace(/[\s()*·]/g,"")}
+function num(t){
+t=t.toLowerCase().replace(/[−–—]/g,"-").replace(/\s+/g,"").replace(/^[a-z]=/,"");
+t=t.replace(/ra[ií]z(de)?|sqrt/g,"√").replace(/(\d)√/g,"$1*√").replace(/√\(?(\d+(\.\d+)?)\)?/g,"sqrt($1)").replace(/,/g,".");
+if(!/^(?:[\d.+\-*\/()]|sqrt)+$/.test(t))return NaN;
+try{var v=Function("sqrt","return "+t)(Math.sqrt);return typeof v=="number"?v:NaN}catch(e){return NaN}}
+function start(){i=0;s=0;wrong=[];$("end").hidden=true;$("quiz").hidden=false;show()}
+function show(){
+var q=Q[i];done=false;
+$("n").textContent="Pregunta "+(i+1)+" de "+Q.length;
+$("pts").textContent="Aciertos: "+s;
+var p=i/Q.length*100;$("bar").style.width=p+"%";$("tip").style.left=p+"%";
+$("q").textContent=q[0];
+$("res").hidden=true;$("chk").hidden=false;
+$("next").textContent=i==Q.length-1?"Ver mi puntuación":"Siguiente pregunta";
+var f=$("flds");f.innerHTML="";
+q[1].forEach(function(x,k){
+var w=document.createElement("div");w.className="fld";
+w.innerHTML='<label for="f'+k+'"></label><input id="f'+k+'" autocomplete="off" autocapitalize="none" spellcheck="false"><div class="cor" hidden></div>';
+w.children[0].textContent=x.l;
+w.children[1].onkeydown=function(e){if(e.key=="Enter"){e.preventDefault();check()}};
+f.appendChild(w)});
+$("f0").focus()}
+function check(){
+if(done)return;done=true;
+var q=Q[i],ok=true;
+q[1].forEach(function(x,k){
+var inp=$("f"+k),v=inp.value,g=x.t=="n"?Math.abs(num(v)-x.v)<0.011:x.a.indexOf(norm(v))>-1;
+inp.disabled=true;inp.className=g?"ok":"bad";
+if(!g){ok=false;var c=inp.nextSibling;c.hidden=false;c.textContent="Respuesta correcta: "+x.d}});
+if(ok)s++;else wrong.push(i);
+$("pts").textContent="Aciertos: "+s;
+$("fb").textContent=ok?"¡Correcto!":"No es correcto. Revisa la corrección y el procedimiento paso a paso:";
+$("fb").style.color=ok?"var(--ok)":"var(--bad)";
+var ol=document.createElement("ol");ol.className="st";
+q[2].forEach(function(t){var li=document.createElement("li");li.textContent=t;ol.appendChild(li)});
+var sol=$("sol");sol.innerHTML="";
+if(ok){var d=document.createElement("details"),sm=document.createElement("summary");sm.textContent="Ver procedimiento";d.appendChild(sm);d.appendChild(ol);sol.appendChild(d)}
+else sol.appendChild(ol);
+$("chk").hidden=true;$("res").hidden=false;$("next").focus()}
+$("chk").onclick=check;
+$("next").onclick=function(){i++;if(i<Q.length)show();else finish()};
+$("again").onclick=start;
+function finish(){
+$("quiz").hidden=true;$("end").hidden=false;
+var pc=Math.round(s/Q.length*100);
+$("sc").textContent=s+" / "+Q.length+" ("+pc+"%)";
+$("msg").textContent=pc>=90?"Excelente dominio de los temas.":pc>=70?"Muy bien. Repasa lo que fallaste y listo.":pc>=50?"Vas por buen camino. Repasa las preguntas falladas.":"Necesitas repasar más. Revisa los procedimientos y vuelve a intentarlo.";
+var r=$("rev");r.innerHTML="";
+if(!wrong.length){r.textContent="No fallaste ninguna pregunta.";return}
+var h=document.createElement("p");h.innerHTML="<b>Preguntas para repasar</b>";r.appendChild(h);
+wrong.forEach(function(w){
+var q=Q[w],d=document.createElement("div"),t=document.createElement("p"),c=document.createElement("p"),ol=document.createElement("ol");
+t.innerHTML="<b></b>";t.firstChild.textContent=(w+1)+". "+q[0];
+c.textContent="Respuesta correcta: "+q[1].map(function(x){return x.d}).join(" ; ");c.style.color="var(--ok)";
+ol.className="st";q[2].forEach(function(x){var li=document.createElement("li");li.textContent=x;ol.appendChild(li)});
+d.appendChild(t);d.appendChild(c);d.appendChild(ol);r.appendChild(d)});
+window.scrollTo(0,0)}
+start();
+</script>
+</body>
+</html>
